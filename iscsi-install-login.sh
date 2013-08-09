@@ -5,8 +5,8 @@ log_file="/root/iscsi-install-login.log"
 
 function log()
 {
-  echo -e "$(date +%b\ %d\ %H:%M:%S) $(hostname -s) iscsi-install-login: $@" >> $log_file
-  echo -e "$(date +%b\ %d\ %H:%M:%S) $(hostname -s) iscsi-install-login: $@"
+  echo -e "$(date +%b\ %d\ %H:%M:%S) iscsi-install-login: $@" >> $log_file
+  echo -e "$(date +%b\ %d\ %H:%M:%S) iscsi-install-login: $@"
 }
 
 # Make sure only root can run our script
@@ -24,6 +24,7 @@ if [[ -f /tmp/iscsi-install-login.run ]] ; then
     read -p "Are you sure you want to continue (y/n)? " -n 1 -r
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
+        echo
         echo
         log "Attempting to remove open-iscsi"
         if ! apt-get -y --purge remove open-iscsi &> /dev/null ; then
@@ -99,3 +100,30 @@ if ! sed -i "s/#discovery.sendtargets.auth.password =.*\+/discovery.sendtargets.
   exit 1
 fi
 
+log "Restarting open-iscsi"
+service open-iscsi restart
+
+
+#Ask for iscsi username
+echo "Enter the Targets IP address: "
+read -n10 -e ipaddr
+echo
+iscsiadm --mode discovery --type sendtargets --portal $ipaddr
+echo
+echo "Did the above look something (dates and names will differ) like:"
+echo "$ipaddr:3260,1 iqn.2013-08.com.example:somenamehere"
+echo
+read -p "(y/n)? " -n 1 -r
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+    echo
+else
+    log "Something must be wrong w/ your target (or something else)"
+    exit
+fi
+
+log "Restarting open-iscsi"
+service open-iscsi restart
+
+log "logging into the discovered iscsi"
+iscsiadm --mode node --login
