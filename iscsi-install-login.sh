@@ -9,6 +9,35 @@ function log()
   echo -e "$(date +%b\ %d\ %H:%M:%S) iscsi-install-login: $@"
 }
 
+function collectinfo()
+{
+  #Ask for iscsi username
+  echo "Enter the Targets IP address: "
+  read -n20 -e ipaddr
+  echo
+
+  #Ask for iscsi username
+  echo "Enter iscsi username (20char max): "
+  read -n20 -e username
+
+  while :; do
+    echo -n "Enter iscsi password: "
+    read -s password
+    echo ""
+    echo -n "Please Re-type the iscsi password: "
+    read -s password2
+    echo ""
+    [ "$password" = "$password2" ] && break
+    echo "Passwords don't match! Try again."
+  done
+
+  log "storing info at $storeinfo"
+  log "...remove this file if you don't want that info stored"
+  declare -p $ipaddr | cut -d ' ' -f 3- > $storeinfo
+  declare -p $password | cut -d ' ' -f 3- >> $storeinfo
+  declare -p $username | cut -d ' ' -f 3- >> $storeinfo
+}
+
 # Make sure only root can run our script
 if [ "$(id -u)" != "0" ]; then
    echo "This script must be run as root (or sudo)" 1>&2
@@ -19,7 +48,8 @@ if [[ -f /tmp/iscsi-install-login.run ]] ; then
     echo
     echo 'You have previously run this script,' 
     echo '  ...running it again will remove open-iscsi'
-    echo '  ...and its config files before reinstalling (so it can start with a clean slate)'
+    echo '  ...and its config files before reinstalling'
+    echo '  ...(so it can start with a clean slate)'
     #ask if they want to continue
     read -p "Are you sure you want to continue (y/n)? " -n 1 -r
     if [[ $REPLY =~ ^[Yy]$ ]]
@@ -38,46 +68,22 @@ if [[ -f /tmp/iscsi-install-login.run ]] ; then
     fi
 fi
 
-storeinfo = '/root/isci-install-login'
+storeinfo='/root/isci-install-login'
 
 if [[ -f $storeinfo ]] ; then
   echo
   echo "You have previously run this script and have stored ip,"
   echo "username and password..."
-  read -p "Are you want to re-use that info? ('n' will allow you to re-enter)[y/n]? " -n 1 -r
+  read -p "Do you want to re-use that info? ('n' will allow you to re-enter)[y/n]? " -n 1 -r
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
       echo
       echo
       source $storeinfo
   else
-    #Ask for iscsi username
-    echo "Enter the Targets IP address: "
-    read -n20 -e ipaddr
-    echo
-
-    #Ask for iscsi username
-    echo "Enter iscsi username (20char max): "
-    read -n20 -e username
-
-    while :; do
-      echo -n "Enter iscsi password: "
-      read -s password
-      echo ""
-      echo -n "Please Re-type the iscsi password: "
-      read -s password2
-      echo ""
-      [ "$password" = "$password2" ] && break
-      echo "Passwords don't match! Try again."
-    done
-
-    log "storing info at $storeinfo"
-    log "...remove this file if you don't want that info stored"
-    declare -p $ipaddr | cut -d ' ' -f 3- > $storeinfo
-    declare -p $password | cut -d ' ' -f 3- >> $storeinfo
-    declare -p $username | cut -d ' ' -f 3- >> $storeinfo
+    collectinfo
   fi
-
+else
 fi
 
 
