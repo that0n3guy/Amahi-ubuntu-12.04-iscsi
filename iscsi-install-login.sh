@@ -33,9 +33,9 @@ function collectinfo()
 
   log "storing info at $storeinfo"
   log "...remove this file if you don't want that info stored"
-  declare -p $ipaddr | cut -d ' ' -f 3- > $storeinfo
-  declare -p $password | cut -d ' ' -f 3- >> $storeinfo
-  declare -p $username | cut -d ' ' -f 3- >> $storeinfo
+  echo username=$username > $storeinfo
+  echo password=$password >> $storeinfo
+  echo ipaddr=$ipaddr >> $storeinfo
 }
 
 # Make sure only root can run our script
@@ -79,11 +79,15 @@ if [[ -f $storeinfo ]] ; then
   then
       echo
       echo
-      source $storeinfo
+      #restore previous variables
+      . $storeinfo
   else
+    echo
     collectinfo
   fi
 else
+  echo
+  collectinfo
 fi
 
 
@@ -154,6 +158,15 @@ fi
 
 log "Restarting open-iscsi"
 service open-iscsi restart
+echo
+
+log "logging out of the discovered iscsi (incase we previously logged in)"
+iscsiadm --mode node --portal $ipaddr --logout
+
 
 log "logging into the discovered iscsi"
-iscsiadm --mode node --login
+iscsiadm --mode node --portal $ipaddr --login
+
+echo
+echo "if you want to logout of this, run:"
+echo "iscsiadm --mode node --portal $ipaddr --logout"
