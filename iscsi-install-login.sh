@@ -38,22 +38,49 @@ if [[ -f /tmp/iscsi-install-login.run ]] ; then
     fi
 fi
 
-echo
-#Ask for iscsi username
-echo "Enter iscsi username (20char max): "
-read -n20 -e username
+storeinfo = '/root/isci-install-login'
+
+if [[ -f $storeinfo ]] ; then
+  echo
+  echo "You have previously run this script and have stored ip,"
+  echo "username and password..."
+  read -p "Are you want to re-use that info? ('n' will allow you to re-enter)[y/n]? " -n 1 -r
+  if [[ $REPLY =~ ^[Yy]$ ]]
+  then
+      echo
+      echo
+      source $storeinfo
+  else
+    #Ask for iscsi username
+    echo "Enter the Targets IP address: "
+    read -n20 -e ipaddr
+    echo
+
+    #Ask for iscsi username
+    echo "Enter iscsi username (20char max): "
+    read -n20 -e username
+
+    while :; do
+      echo -n "Enter iscsi password: "
+      read -s password
+      echo ""
+      echo -n "Please Re-type the iscsi password: "
+      read -s password2
+      echo ""
+      [ "$password" = "$password2" ] && break
+      echo "Passwords don't match! Try again."
+    done
+
+    log "storing info at $storeinfo"
+    log "...remove this file if you don't want that info stored"
+    declare -p $ipaddr | cut -d ' ' -f 3- > $storeinfo
+    declare -p $password | cut -d ' ' -f 3- >> $storeinfo
+    declare -p $username | cut -d ' ' -f 3- >> $storeinfo
+  fi
+
+fi
 
 
-while :; do
-  echo -n "Enter iscsi password: "
-  read -s password
-  echo ""
-  echo -n "Please Re-type the iscsi password: "
-  read -s password2
-  echo ""
-  [ "$password" = "$password2" ] && break
-  echo "Passwords don't match! Try again."
-done
 
 echo
 log "Attempting to install open-iscsi"
@@ -104,10 +131,7 @@ log "Restarting open-iscsi"
 service open-iscsi restart
 echo
 
-#Ask for iscsi username
-echo "Enter the Targets IP address: "
-read -n20 -e ipaddr
-echo
+
 iscsiadm --mode discovery --type sendtargets --portal $ipaddr
 echo
 echo "Did the above look something (dates and names will differ) like:"
