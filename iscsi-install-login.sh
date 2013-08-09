@@ -18,8 +18,8 @@ fi
 if [[ -f /tmp/iscsi-install-login.run ]] ; then
     echo
     echo 'You have previously run this script,' 
-    echo '  running it again will remove open-iscsi and its'
-    echo '  config files before reinstalling (so it can start with a clean slate)'
+    echo '  ...running it again will remove open-iscsi'
+    echo '  ...and its config files before reinstalling (so it can start with a clean slate)'
     #ask if they want to continue
     read -p "Are you sure you want to continue (y/n)? " -n 1 -r
     if [[ $REPLY =~ ^[Yy]$ ]]
@@ -37,9 +37,10 @@ if [[ -f /tmp/iscsi-install-login.run ]] ; then
     fi
 fi
 
+echo
 #Ask for iscsi username
 echo "Enter iscsi username: "
-read username
+read -n10 -e username
 
 
 while :; do
