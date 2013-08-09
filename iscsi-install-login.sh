@@ -40,8 +40,8 @@ fi
 
 echo
 #Ask for iscsi username
-echo "Enter iscsi username: "
-read -n10 -e username
+echo "Enter iscsi username (20char max): "
+read -n20 -e username
 
 
 while :; do
@@ -55,7 +55,7 @@ while :; do
   echo "Passwords don't match! Try again."
 done
 
-
+echo
 log "Attempting to install open-iscsi"
 if ! apt-get -y install open-iscsi &> /dev/null ; then
   log "FATAL: failed to install open-iscsi, try doing 'sudo apt-get install open-iscsi' manually."
@@ -102,11 +102,11 @@ fi
 
 log "Restarting open-iscsi"
 service open-iscsi restart
-
+echo
 
 #Ask for iscsi username
 echo "Enter the Targets IP address: "
-read -n10 -e ipaddr
+read -n20 -e ipaddr
 echo
 iscsiadm --mode discovery --type sendtargets --portal $ipaddr
 echo
