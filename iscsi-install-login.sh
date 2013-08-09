@@ -79,6 +79,7 @@ if [[ -f $storeinfo ]] ; then
   then
       echo
       echo
+      log "Loading previously inputted values"
       #restore previous variables
       . $storeinfo
   else
@@ -141,10 +142,11 @@ log "Restarting open-iscsi"
 service open-iscsi restart
 echo
 
-
+echo "Attempting to discover targets on $ipaddr"
 iscsiadm --mode discovery --type sendtargets --portal $ipaddr
+
 echo
-echo "Did the above look something (dates and names will differ) like:"
+echo "Did the above look something like (dates and names will differ):"
 echo "$ipaddr:3260,1 iqn.2013-08.com.example:somenamehere"
 echo
 read -p "(y/n)? " -n 1 -r
@@ -162,11 +164,15 @@ echo
 
 log "logging out of the discovered iscsi (incase we previously logged in)"
 iscsiadm --mode node --portal $ipaddr --logout
-
+echo
 
 log "logging into the discovered iscsi"
 iscsiadm --mode node --portal $ipaddr --login
 
 echo
-echo "if you want to logout of this, run:"
-echo "iscsiadm --mode node --portal $ipaddr --logout"
+echo "If you want to logout of target in the future, run:"
+echo "sudo iscsiadm --mode node --portal $ipaddr --logout"
+echo
+
+echo 'Run "dmesg | grep sd" to verify your connected.'
+echo '  see https://help.ubuntu.com/lts/serverguide/iscsi-initiator.html for more info'
