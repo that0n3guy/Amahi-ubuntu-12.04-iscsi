@@ -17,12 +17,11 @@ fi
 
 if [[ -f /tmp/iscsi-install-login.run ]] ; then
     echo
-    echo
     echo 'You have previously run this script,' 
     echo '  running it again will remove open-iscsi and its'
     echo '  config files before reinstalling (so it can start with a clean slate)'
     #ask if they want to continue
-    read -p "Are you sure you want to continue? " -n 1 -r
+    read -p "Are you sure you want to continue (y/n)? " -n 1 -r
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
         echo
@@ -42,20 +41,17 @@ fi
 echo "Enter iscsi username: "
 read username
 
-#Ask for iscsi password
-echo "Enter iscsi password: "
-read -s password
 
-#Ask for iscsi password
-echo "Re-enter iscsi password: "
-read -s password2
-
-
-
-if [ $password = $password2 ] ; then
-  log "Oops: Passwords don't match... re-run script and try again"
-  exit 1
-fi
+while :; do
+  echo -n "Enter iscsi password: "
+  read -s password
+  echo ""
+  echo -n "Please Re-type the iscsi password: "
+  read -s password2
+  echo ""
+  [ "$password" = "$password2" ] && break
+  echo "Passwords don't match! Try again."
+done
 
 
 log "Attempting to install open-iscsi"
