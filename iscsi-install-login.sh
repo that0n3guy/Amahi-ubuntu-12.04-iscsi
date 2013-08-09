@@ -9,15 +9,13 @@ function log()
   echo -e "$(date +%b\ %d\ %H:%M:%S) $(hostname -s) iscsi-install-login: $@"
 }
 
-function remove()
-{
-
-}
-
 
 if [[ -f /tmp/iscsi-install-login.run ]] ; then
-    echo 'You have previously run this script, running it again will remove open-iscsi and its'
-    echo 'config files before reinstalling (so it can start with a clean slate)'
+    echo
+    echo
+    echo 'You have previously run this script,' 
+    echo '  running it again will remove open-iscsi and its'
+    echo '  config files before reinstalling (so it can start with a clean slate)'
     #ask if they want to continue
     read -p "Are you sure you want to continue? " -n 1 -r
     if [[ $REPLY =~ ^[Yy]$ ]]
@@ -28,6 +26,8 @@ if [[ -f /tmp/iscsi-install-login.run ]] ; then
           exit 1
         fi
         rm -f /tmp/iscsi-install-login.run
+    else
+        exit
     fi
 fi
 
