@@ -9,6 +9,11 @@ function log()
   echo -e "$(date +%b\ %d\ %H:%M:%S) $(hostname -s) iscsi-install-login: $@"
 }
 
+# Make sure only root can run our script
+if [ "$(id -u)" != "0" ]; then
+   echo "This script must be run as root (or sudo)" 1>&2
+   exit 1
+fi
 
 if [[ -f /tmp/iscsi-install-login.run ]] ; then
     echo
@@ -27,6 +32,7 @@ if [[ -f /tmp/iscsi-install-login.run ]] ; then
         fi
         rm -f /tmp/iscsi-install-login.run
     else
+        echo
         exit
     fi
 fi
