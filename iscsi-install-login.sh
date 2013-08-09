@@ -25,8 +25,9 @@ if [[ -f /tmp/iscsi-install-login.run ]] ; then
     read -p "Are you sure you want to continue? " -n 1 -r
     if [[ $REPLY =~ ^[Yy]$ ]]
     then
+        echo
         log "Attempting to remove open-iscsi"
-        if ! apt-get --purge remove open-iscsi &> /dev/null ; then
+        if ! apt-get -y --purge remove open-iscsi &> /dev/null ; then
           log "FATAL: failed to remove open-iscsi, try doing 'sudo apt-get --purge remove open-iscsi' manually."
           exit 1
         fi
